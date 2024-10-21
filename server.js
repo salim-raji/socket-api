@@ -86,6 +86,12 @@ app.post("/post", async (req, res) => {
     } catch (err) {
       res.status(500).json({ error: "Error processing request" });
     }
+
+    await sendPushNotification({
+      action: 'User Added',
+      message: `User has been added.`,
+    });
+  
   });
   
   app.delete("/delete/:id", async (req, res) => {
@@ -103,6 +109,14 @@ app.post("/post", async (req, res) => {
     } else {
       res.status(400).json({ error: "Invalid ID format" });
     }
+
+    
+      await sendPushNotification({
+        action: 'User Deleted',
+        message: `User has been deleted.`,
+      });
+    
+    
   });
   
   app.patch("/update/:id", async (req, res) => {
@@ -143,7 +157,52 @@ app.post("/post", async (req, res) => {
     } else {
       res.status(400).json({ error: "Invalid ID format" });
     }
+
+    await sendPushNotification({
+      action: 'User Updated',
+      message: `User has been updated.`,
+    });
+  
   });
+
+
+  //WEB PUSH
+  const webPush = require('web-push');
+
+  const vapidKeys = {
+    publicKey: 'BMxcrvZIF9H2bz7koJhag9g96Thx8drIJ7EoWYwORS97bRreZ9jimch8HaZMeLqR4E-IiWiSJAb72-V6Exuaj1M',
+    privateKey: 'SpDkDU33-GG3y9Aw0nLth89HB35qIpTmiHuz2dbu9M4',
+  };
+  
+  webPush.setVapidDetails(
+    'mailto:salimraji@icloud.com',
+    vapidKeys.publicKey,
+    vapidKeys.privateKey
+  );
+  
+  let subscriptions = [];
+
+  app.post('/subscribe', (req, res) => {
+    const subscription = req.body;
+    subscriptions.push(subscription);
+    res.status(201).json({});
+  });
+
+  async function sendPushNotification(data) {
+    const payload = JSON.stringify({
+      title: data.action,
+      body: data.message,
+    });
+  
+    for (const subscription of subscriptions) {
+      try {
+        await webPush.sendNotification(subscription, payload);
+      } catch (error) {
+        console.error('Error sending notification:', error);
+      }
+    }
+  }
+  
   
 
 http.listen(4000, () => {
