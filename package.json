@@ -15,6 +15,7 @@
     "migrate-mongo": "^11.0.0",
     "mongodb": "^6.9.0",
     "mongoose": "^8.7.1",
+    "redis": "^4.7.0",
     "sharp": "^0.33.5",
     "socket.io": "^4.8.0",
     "web-push": "^3.6.7"
